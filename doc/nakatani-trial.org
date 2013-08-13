@@ -119,7 +119,7 @@ Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
    #+BEGIN_SRC sh
 $ dstat -M top_bio -al
 WARNING: Option -M is deprecated, please use --top_bio instead
-----most-expensive---- ----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system-- ---load-avg---
+ ----most-expensive---- ----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system-- ---load-avg---
   block i/o process   |usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw | 1m   5m  15m 
 mysqld        3B  157B|  0   0  99   0   0   0| 494B   22k|   0     0 |   0     2B|  61    95 |0.01 0.14 0.48
 mysqld     8192B  256k|  0   1  82  18   0   0|8192B  484k|1108B 3644B|   0     0 | 169   339 |0.01 0.14 0.48
