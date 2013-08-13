@@ -169,9 +169,29 @@ SET timestamp=1376364921;
 INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 3, "00-00"), ...
     #+END_SRC
 
+** stockテーブルをstaticに [失敗]
+   - stockテーブルは webapp/config/database/initial_data.sql にて毎回初期化されているが，
+     他のどこからもUPDATEされてなさそう
+     - 毎回TRUNCATEするのをやめよう
+     - *エラー* -> "Starting Check:ticket counts are not initialized correctly"
+   - やっぱりUPDATEされていた -> "UPDATE stock SET order_id = 50 WHERE variation_id = 9 AND order_id IS NULL ORDER BY RAND() LIMIT 1;"
+     - *MySQLに渡された全クエリを見る* -> slow query log を有効にした状態で "mysql> set global long_query_time=0.01;"
+   - 大部分のシートがinitされた状態のまま．密行列(stockテーブル)で持つのは非常にアホらしい．
+
+** stockテーブルを全部メモリに置く
+   - 密行列なので，あまりセンスは良くないが・・・
+   - 64 * 64 * 10 = 2^12 * 10 = 40K シート
+   - 1シート = 1レコード辺りせいぜい1KBくらいっぽいし，40MBくらい．余裕でメモリに収まる．
+   - stockテーブルは元々インデックスもない．
+   - スクリプトのhash tableで
+     { "seat_id": {他のカラムたち} }
+     みたいな情報を持てば良いような気がする．
+     - いや，全クエリをさっと見ると，ほぼ全部 variation_id で JOIN されている．
+       なので，
+       { "variation_id": {他のカラムたち} }
+       ってのを持たせるように改造するのが良さそう．
+
 ** TODO
-   - 最初の10秒くらいに何が起きているかをチェックし，gunicornが頑張り始めるまでを短縮できないか検討
-     - mysqlのblock ioだったので，更に原因を追求
-     - isucon2.stock テーブルの正体を掴み，staticにも足せることができるかを検討
+   - stockテーブルをなくして，代わりに { "variation_id": {他のカラムたち} } っていうハッシュテーブルをLLレベルで持たせる．
    - slow logチェック
    - my.cnfチェック

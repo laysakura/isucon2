@@ -39,6 +39,7 @@ def connect_db():
 def init_db():
     print "Initializing database"
     with connect_db() as cur:
+        # この initial_data.sql の中でものすごいでかいINSERT INTOを10回していて，それがめちゃ重たい
         with open('../config/database/initial_data.sql') as fp:
             for line in fp:
                 line = line.strip()
