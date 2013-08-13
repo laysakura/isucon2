@@ -145,9 +145,32 @@ mysqld        0   100k| 44   1  53   2   0   1|   0   188k| 188k 4183k|   0     
 mysqld        0   100k| 98   2   0   0   0   0|   0   184k| 292k   12M|   0     0 |2208  1806 |0.70 0.29 0.52
    #+END_SRC
 
+   - 何か毎回初回設定的なinsertをしている
+     - mysql> set global long_query_time=1; をした後でslow_query_logを見て判明
+     - これってstaticに持ったらだめかな？オンメモリに持たせるのも魅力的．
+   #+BEGIN_SRC sql
+# Time: 130813 12:35:20
+# User@Host: root[root] @ localhost [127.0.0.1]  Id: 18963
+# Query_time: 1.590130  Lock_time: 0.003972 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1376364920;
+INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 1, "00-00"), ...
+
+# Time: 130813 12:35:21
+# User@Host: root[root] @ localhost [127.0.0.1]  Id: 18963
+# Query_time: 1.254279  Lock_time: 0.005613 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1376364921;
+INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 2, "00-00"), ...
+
+# Time: 130813 12:35:21
+# User@Host: root[root] @ localhost [127.0.0.1]  Id: 18963
+# Query_time: 1.254279  Lock_time: 0.005613 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1376364921;
+INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 3, "00-00"), ...
+   #+END_SRC
 
 * TODO
   - 最初の10秒くらいに何が起きているかをチェックし，gunicornが頑張り始めるまでを短縮できないか検討
     - mysqlのblock ioだったので，更に原因を追求
+    - isucon2.stock テーブルの正体を掴み，staticにも足せることができるかを検討
   - slow logチェック
   - my.cnfチェック
