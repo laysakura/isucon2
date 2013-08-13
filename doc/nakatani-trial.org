@@ -1,63 +1,64 @@
-* 初期状態
-** スコア
-   #+BEGIN_SRC sh
-   Score:1507727
-   Tickets:326
-   SoldOut:-
-   SoldOutAt:-
-   GET:2506
-   POST:326
-   Errors:-
-   Timeouts:-
-   Update:09:30:19
-   #+END_SRC
+* 練習 w/ ISUCON2
+** 初期状態
+*** スコア
+    #+BEGIN_SRC sh
+    Score:1507727
+    Tickets:326
+    SoldOut:-
+    SoldOutAt:-
+    GET:2506
+    POST:326
+    Errors:-
+    Timeouts:-
+    Update:09:30:19
+    #+END_SRC
 
-** パフォーマンス気付いた点
-   - mysqlもgunicornもCPU使いまくってる
-     - gunicornが10ワーカ立てているのが気になる．立て過ぎなのか，リクエストを裁くにはもっといるのか．
+*** パフォーマンス気付いた点
+    - mysqlもgunicornもCPU使いまくってる
+      - gunicornが10ワーカ立てているのが気になる．立て過ぎなのか，リクエストを裁くにはもっといるのか．
 
-* gunicorn 10 workers -> 2 workers
-** スコア
-   *down*
-   #+BEGIN_SRC sh
-   Score:1905114
-   Tickets:258
-   SoldOut:-
-   SoldOutAt:-
-   GET:1994
-   POST:258
-   Errors:-
-   Timeouts:-
-   Update:09:56:01
-   #+END_SRC
+** gunicorn 10 workers -> 2 workers
+*** スコア
+    *down*
+    #+BEGIN_SRC sh
+Score:1905114
+Tickets:258
+SoldOut:-
+SoldOutAt:-
+GET:1994
+POST:258
+Errors:-
+Timeouts:-
+Update:09:56:01
+    #+END_SRC
 
-** パフォーマンス気付いた点
-   - gunicornはちゃんと1ワーカでCPU60%くらい使うようにはなった
-   - *最初の10秒くらい，mysqlが10%くらいCPU使うが，gunicornは何もしてない時間がある．これなんだろ?*
+*** パフォーマンス気付いた点
+    - gunicornはちゃんと1ワーカでCPU60%くらい使うようにはなった
+    - *最初の10秒くらい，mysqlが10%くらいCPU使うが，gunicornは何もしてない時間がある．これなんだろ?*
 
-* gunicorn 10 workers -> 15 workers
-** スコア
-   *even*
-   #+BEGIN_SRC sh
-   Score:1445644
-   Tickets:340
-   SoldOut:-
-   SoldOutAt:-
-   GET:2716
-   POST:340
-   Errors:-
-   Timeouts:-
-   Update:10:00:35
-   #+END_SRC
+** gunicorn 10 workers -> 15 workers
+*** スコア
+    *even*
+    #+BEGIN_SRC sh
+Score:1445644
+Tickets:340
+SoldOut:-
+SoldOutAt:-
+GET:2716
+POST:340
+Errors:-
+Timeouts:-
+Update:10:00:35
+    #+END_SRC
 
-** パフォーマンス気付いた点
+*** パフォーマンス気付いた点
 
-* 「最初の10秒」解明
-** スコア
+** 「最初の10秒」解明
+*** スコア
 
-** パフォーマンス気付いた点
-   - めっちゃiowaitしている
-   #+BEGIN_SRC sh
+*** パフォーマンス気付いた点
+    - めっちゃiowaitしている
+    #+BEGIN_SRC sh
 $ sudo sar -u 1
 Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 
@@ -84,10 +85,10 @@ Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 11時46分04秒     all     10.50      0.00      1.00     40.00      0.00     48.50
 11時46分05秒     all     67.50      0.00      1.00      1.00      0.00     30.50
 11時46分06秒     all     95.00      0.00      5.00      0.00      0.00      0.00
-   #+END_SRC
+    #+END_SRC
 
-   - しかもblocked write
-   #+BEGIN_SRC sh
+    - しかもblocked write
+    #+BEGIN_SRC sh
 $ sudo sar -b 1
 Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 
@@ -113,10 +114,10 @@ Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 11時48分39秒     47.00      2.00     45.00     16.00  11912.00
 11時48分40秒     24.00      0.00     24.00      0.00    400.00
 11時48分41秒     19.00      0.00     19.00      0.00    344.00
-   #+END_SRC
+    #+END_SRC
 
-   - mysqlが最初にdisk io bottleneckなことやってることが分かった．
-   #+BEGIN_SRC sh
+    - mysqlが最初にdisk io bottleneckなことやってることが分かった．
+    #+BEGIN_SRC sh
 $ dstat -M top_bio -al
 WARNING: Option -M is deprecated, please use --top_bio instead
 .----most-expensive---- ----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system-- ---load-avg---
@@ -143,12 +144,12 @@ mysqld     4096B 6052k|  2   0  51  46   0   0|4096B 6424k| 342B 1352B|   0     
 mysqld     8192B 9728k| 11   1  46  43   0   0|8192B 9348k| 712B 2072B|   0     0 | 326   505 |0.70 0.29 0.52
 mysqld        0   100k| 44   1  53   2   0   1|   0   188k| 188k 4183k|   0     0 |1196   912 |0.70 0.29 0.52
 mysqld        0   100k| 98   2   0   0   0   0|   0   184k| 292k   12M|   0     0 |2208  1806 |0.70 0.29 0.52
-   #+END_SRC
+    #+END_SRC
 
-   - 何か毎回初回設定的なinsertをしている
-     - mysql> set global long_query_time=1; をした後でslow_query_logを見て判明
-     - これってstaticに持ったらだめかな？オンメモリに持たせるのも魅力的．
-   #+BEGIN_SRC sql
+    - 何か毎回初回設定的なinsertをしている
+      - mysql> set global long_query_time=1; をした後でslow_query_logを見て判明
+      - これってstaticに持ったらだめかな？オンメモリに持たせるのも魅力的．
+    #+BEGIN_SRC sql
 # Time: 130813 12:35:20
 # User@Host: root[root] @ localhost [127.0.0.1]  Id: 18963
 # Query_time: 1.590130  Lock_time: 0.003972 Rows_sent: 0  Rows_examined: 0
@@ -166,11 +167,11 @@ INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 2, "00-00"), ...
 # Query_time: 1.254279  Lock_time: 0.005613 Rows_sent: 0  Rows_examined: 0
 SET timestamp=1376364921;
 INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 3, "00-00"), ...
-   #+END_SRC
+    #+END_SRC
 
-* TODO
-  - 最初の10秒くらいに何が起きているかをチェックし，gunicornが頑張り始めるまでを短縮できないか検討
-    - mysqlのblock ioだったので，更に原因を追求
-    - isucon2.stock テーブルの正体を掴み，staticにも足せることができるかを検討
-  - slow logチェック
-  - my.cnfチェック
+** TODO
+   - 最初の10秒くらいに何が起きているかをチェックし，gunicornが頑張り始めるまでを短縮できないか検討
+     - mysqlのblock ioだったので，更に原因を追求
+     - isucon2.stock テーブルの正体を掴み，staticにも足せることができるかを検討
+   - slow logチェック
+   - my.cnfチェック
