@@ -1,5 +1,6 @@
 * 初期状態
 ** スコア
+   #+BEGIN_SRC sh
    Score:1507727
    Tickets:326
    SoldOut:-
@@ -9,6 +10,7 @@
    Errors:-
    Timeouts:-
    Update:09:30:19
+   #+END_SRC
 
 ** パフォーマンス気付いた点
    - mysqlもgunicornもCPU使いまくってる
@@ -17,6 +19,7 @@
 * gunicorn 10 workers -> 2 workers
 ** スコア
    *down*
+   #+BEGIN_SRC sh
    Score:1905114
    Tickets:258
    SoldOut:-
@@ -26,6 +29,7 @@
    Errors:-
    Timeouts:-
    Update:09:56:01
+   #+END_SRC
 
 ** パフォーマンス気付いた点
    - gunicornはちゃんと1ワーカでCPU60%くらい使うようにはなった
@@ -34,6 +38,7 @@
 * gunicorn 10 workers -> 15 workers
 ** スコア
    *even*
+   #+BEGIN_SRC sh
    Score:1445644
    Tickets:340
    SoldOut:-
@@ -43,6 +48,7 @@
    Errors:-
    Timeouts:-
    Update:10:00:35
+   #+END_SRC
 
 ** パフォーマンス気付いた点
 
@@ -81,7 +87,7 @@ Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
    #+END_SRC
 
    - しかもblocked write
-   #+BEGIN_QUOTE
+   #+BEGIN_SRC sh
 $ sudo sar -b 1
 Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 
@@ -107,10 +113,10 @@ Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 11時48分39秒     47.00      2.00     45.00     16.00  11912.00
 11時48分40秒     24.00      0.00     24.00      0.00    400.00
 11時48分41秒     19.00      0.00     19.00      0.00    344.00
-   #+END_QUOTE
+   #+END_SRC
 
    - mysqlが最初にdisk io bottleneckなことやってることが分かった．
-   #+BEGIN_QUOTE
+   #+BEGIN_SRC sh
 $ dstat -M top_bio -al
 WARNING: Option -M is deprecated, please use --top_bio instead
 ----most-expensive---- ----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system-- ---load-avg---
@@ -137,10 +143,11 @@ mysqld     4096B 6052k|  2   0  51  46   0   0|4096B 6424k| 342B 1352B|   0     
 mysqld     8192B 9728k| 11   1  46  43   0   0|8192B 9348k| 712B 2072B|   0     0 | 326   505 |0.70 0.29 0.52
 mysqld        0   100k| 44   1  53   2   0   1|   0   188k| 188k 4183k|   0     0 |1196   912 |0.70 0.29 0.52
 mysqld        0   100k| 98   2   0   0   0   0|   0   184k| 292k   12M|   0     0 |2208  1806 |0.70 0.29 0.52
-   #+END_QUOTE
+   #+END_SRC
 
 
 * TODO
   - 最初の10秒くらいに何が起きているかをチェックし，gunicornが頑張り始めるまでを短縮できないか検討
+    - mysqlのblock ioだったので，更に原因を追求
   - slow logチェック
   - my.cnfチェック
