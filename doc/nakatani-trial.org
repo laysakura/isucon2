@@ -1,0 +1,52 @@
+* 初期状態
+** スコア
+   Score:1507727
+   Tickets:326
+   SoldOut:-
+   SoldOutAt:-
+   GET:2506
+   POST:326
+   Errors:-
+   Timeouts:-
+   Update:09:30:19
+
+** パフォーマンス気付いた点
+   - mysqlもgunicornもCPU使いまくってる
+     - gunicornが10ワーカ立てているのが気になる．立て過ぎなのか，リクエストを裁くにはもっといるのか．
+
+* gunicorn 10 workers -> 2 workers
+** スコア
+   *down*
+   Score:1905114
+   Tickets:258
+   SoldOut:-
+   SoldOutAt:-
+   GET:1994
+   POST:258
+   Errors:-
+   Timeouts:-
+   Update:09:56:01
+
+** パフォーマンス気付いた点
+   - gunicornはちゃんと1ワーカでCPU60%くらい使うようにはなった
+   - *最初の10秒くらい，mysqlが10%くらいCPU使うが，gunicornは何もしてない時間がある．これなんだろ?*
+
+* gunicorn 10 workers -> 15 workers
+** スコア
+   *even*
+   Score:1445644
+   Tickets:340
+   SoldOut:-
+   SoldOutAt:-
+   GET:2716
+   POST:340
+   Errors:-
+   Timeouts:-
+   Update:10:00:35
+
+** パフォーマンス気付いた点
+
+* TODO
+  - 最初の10秒くらいに何が起きているかをチェックし，gunicornが頑張り始めるまでを短縮できないか検討
+  - slow logチェック
+  - my.cnfチェック
