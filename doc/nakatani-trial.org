@@ -51,11 +51,11 @@
 
 ** パフォーマンス気付いた点
    - めっちゃiowaitしている
-   #+BEGIN_QUOTE
+   #+BEGIN_SRC sh
 $ sudo sar -u 1
 Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 
- 11時45分44秒     CPU     %user     %nice   %system   %iowait    %steal     %idle
+11時45分44秒     CPU     %user     %nice   %system   %iowait    %steal     %idle
 11時45分45秒     all      0.00      0.00      0.50      0.00      0.00     99.50
 11時45分46秒     all      0.50      0.00      0.00      9.55      0.00     89.95
 11時45分47秒     all      0.50      0.00      0.00     47.50      0.00     52.00
@@ -78,10 +78,10 @@ Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 11時46分04秒     all     10.50      0.00      1.00     40.00      0.00     48.50
 11時46分05秒     all     67.50      0.00      1.00      1.00      0.00     30.50
 11時46分06秒     all     95.00      0.00      5.00      0.00      0.00      0.00
-   #+END_QUOTE
+   #+END_SRC
 
    - しかもblocked write
-   #+BEGIN_QUOTE$
+   #+BEGIN_QUOTE
 $ sudo sar -b 1
 Linux 3.2.0-4-amd64 (gueze)     2013年08月13日  _x86_64_        (2 CPU)
 
