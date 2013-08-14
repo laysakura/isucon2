@@ -46,6 +46,10 @@ def init_db():
                 if line:
                     cur.execute(line)
 
+# この関数が，サイドバーを出している．
+# 毎httpリクエスト毎にこんなJOINやっちゃってるのでひどいことになってる．
+# 実用上はそんなに正確にrecentを出す必要はないはず．ベンチマークでの正解チェックがどのくらいキツイのかをチェックして，
+# 緩める努力をすべき．
 def get_recent_sold():
     cur = get_db().cursor()
     cur.execute('''SELECT stock.seat_id, variation.name AS v_name, ticket.name AS t_name, artist.name AS a_name FROM stock

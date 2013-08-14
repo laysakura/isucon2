@@ -175,7 +175,7 @@ INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 3, "00-00"), ...
      - 毎回TRUNCATEするのをやめよう
      - *エラー* -> "Starting Check:ticket counts are not initialized correctly"
    - やっぱりUPDATEされていた -> "UPDATE stock SET order_id = 50 WHERE variation_id = 9 AND order_id IS NULL ORDER BY RAND() LIMIT 1;"
-     - *MySQLに渡された全クエリを見る* -> slow query log を有効にした状態で "mysql> set global long_query_time=0.01;"
+     - *MySQLに渡された全クエリを見る* -> slow query log を有効にした状態で "mysql> set global long_query_time=0;"
    - 大部分のシートがinitされた状態のまま．密行列(stockテーブル)で持つのは非常にアホらしい．
 
 ** stockテーブルを全部メモリに置く
@@ -190,6 +190,25 @@ INSERT INTO isucon2.stock (`variation_id`, `seat_id`) VALUES ( 3, "00-00"), ...
        なので，
        { "variation_id": {他のカラムたち} }
        ってのを持たせるように改造するのが良さそう．
+
+** datadirをtmpfsに
+   - ぱっと見るに，JOIN部分をdict使って書きなおすのはそんなに楽じゃない．
+     全テーブルの容量とか見ても大したことないし，tmpfsに置いたらそれだけでdisk io相当減るでしょう．
+
+*** スコア
+    - *even*
+    - 元々ページキャッシュに十分乗ってた・・・??
+    #+BEGIN_SRC sh
+Score:1507727
+Tickets:326
+SoldOut:-
+SoldOutAt:-
+GET:2511
+POST:326
+Errors:-
+Timeouts:-
+Update:15:14:33
+    #+END_SRC
 
 ** TODO
    - stockテーブルをなくして，代わりに { "variation_id": {他のカラムたち} } っていうハッシュテーブルをLLレベルで持たせる．
