@@ -230,6 +230,75 @@ Update:16:36:42
 sudo apt-get install nginx
 sudo cp /etc/nginx/nginx.conf conf/
 sudo ln -sf ~/git/isucon2/conf/nginx.conf /etc/nginx/
+emacs ~/git/isucon2/conf/nginx.conf
+
+git diff conf/nginx.conf
+diff --git a/conf/nginx.conf b/conf/nginx.conf
+index c027ac5..d6abac0 100644
+--- a/conf/nginx.conf
++++ b/conf/nginx.conf
+@@ -1,4 +1,4 @@
+-user www-data;
++user nakatani;
+ worker_processes 4;
+ pid /var/run/nginx.pid;
+ 
+@@ -16,7 +16,7 @@ http {
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+-       keepalive_timeout 65;
++       keepalive_timeout 0;  # off
+        types_hash_max_size 2048;
+        # server_tokens off;
+ 
+@@ -33,6 +33,33 @@ http {
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+ 
++    ##
++    # Reverse Proxy Settings for App Server
++    ##
++    upstream isucon2-backend {
++        server unix:/tmp/gunicorn.sock fail_timeout=0;
++        # server 127.0.0.1:5000 fail_timeout=0;
++    }
++
++    ##
++    # HTTP Server Settings
++    ##
++    server {
++        listen  80;
++        client_max_body_size 4G;
++        server_name gueze.logos.ic.i.u-tokyo.ac.jp;
++
++        keepalive_timeout 0;
++
++        location / {
++            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
++            proxy_set_header Host $http_host;
++            proxy_set_header X-Real-IP $remote_addr;
++            proxy_pass http://isucon2-backend;
++            break;
++        }
++    }
++
+
+
+sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+14:32:52 nakatani@gueze ~/git/isucon2 (master)
+$ sudo /etc/init.d/nginx restart
+Restarting nginx: nginx.
+14:33:00 nakatani@gueze ~/git/isucon2 (master)
+$ ps auxw |grep nginx
+root     15900  0.0  0.0  76296  1424 ?        Ss   14:33   0:00 nginx: master process /usr/sbin/nginx
+nakatani 15901  0.0  0.0  76648  1984 ?        S    14:33   0:00 nginx: worker process
+nakatani 15902  0.0  0.0  76648  1980 ?        S    14:33   0:00 nginx: worker process
+nakatani 15903  0.0  0.0  76648  1732 ?        S    14:33   0:00 nginx: worker process
+nakatani 15904  0.0  0.0  76648  1732 ?        S    14:33   0:00 nginx: worker process
    #+END_SRC
 
 ** TODO
