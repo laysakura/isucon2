@@ -226,6 +226,23 @@ Update:16:36:42
     #+END_SRC
 
 ** nginxをリバースプロキシ & HTTPサーバに
+   - nginxのworker_processesは2, worker_connectionsは1024くらいがよさげっぽい
+
+*** スコア
+    *up - 微増*
+    #+BEGIN_SRC sh
+Score:1156513
+Tickets:425
+SoldOut:-
+SoldOutAt:-
+GET:3148
+POST:425
+Errors:-
+Timeouts:-
+Update:15:56:51
+    #+END_SRC
+
+*** 作業ログ
    #+BEGIN_SRC sh
 sudo apt-get install nginx
 sudo cp /etc/nginx/nginx.conf conf/
@@ -301,7 +318,58 @@ nakatani 15903  0.0  0.0  76648  1732 ?        S    14:33   0:00 nginx: worker p
 nakatani 15904  0.0  0.0  76648  1732 ?        S    14:33   0:00 nginx: worker process
    #+END_SRC
 
-** TODO
+** nginxのキャッシュサーバ機能を使う
+*** スコア
+    *down - why???*
+    #+BEGIN_SRC sh
+gueze
+Score:1616837
+Tickets:304
+SoldOut:-
+SoldOutAt:-
+GET:4824
+POST:304
+Errors:-
+Timeouts:-
+Update:17:36:13
+    #+END_SRC
+
+*** 作業ログ
+    #+BEGIN_SRC sh
+git diff
+
+@@ -26,6 +25,8 @@ http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+ 
++    proxy_cache_path /var/cache/nginx/static_file_cache levels=1:2 keys_zone=cache_static_file:128m inactive=7d max_size=512m;
++
+        ##
+        # Logging Settings
+        ##
+@@ -56,7 +57,21 @@ http {
+             proxy_set_header Host $http_host;
+             proxy_set_header X-Real-IP $remote_addr;
+             proxy_pass http://isucon2-backend;
+-            break;
++
++            ## Cache
++            set $do_not_cache 0;
++            if ($request_method != GET) {
++                set $do_not_cache 1;
++            }
++            if ($uri !~* ".(jpg|css|js|html)$") {
++                set $do_not_cache 1;
++            }
++            proxy_no_cache $do_not_cache;
++            proxy_cache_bypass $do_not_cache;
++            proxy_cache cache_static_file;
++            proxy_cache_key $scheme$host$uri$is_args$args;
++            proxy_cache_valid 200 302 304 2h;
++            proxy_cache_valid any 1m;
+    #+END_SRC
+
+** TODOs
    - stockテーブルをなくして，代わりに { "variation_id": {他のカラムたち} } っていうハッシュテーブルをLLレベルで持たせる．
    - slow logチェック
    - my.cnfチェック

@@ -6,5 +6,5 @@ workers = 5
 worker_class = 'sync'
 worker_connections = 1000
 max_requests = 0
-timeout = 30
-keepalive = 2
+# timeout = 30
+# keepalive = 2

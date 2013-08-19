@@ -86,6 +86,7 @@ Starter.prototype.transaction = function(worker, callback) {
         cb(null);
       });
     },
+    /* ここが1秒待ってからサイドバーを読んでいる部分 */
     function(cb){ /* wait 1sec */
       setTimeout(function(){ cb(null); }, STARTER_CONTENT_CHECK_WAIT);
     },
