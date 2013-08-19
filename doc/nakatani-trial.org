@@ -210,6 +210,27 @@ Timeouts:-
 Update:15:14:33
     #+END_SRC
 
+** クエリキャッシュを有効に
+*** スコア
+    *up!!*
+    #+BEGIN_SRC sh
+Score:1216629
+Tickets:404
+SoldOut:-
+SoldOutAt:-
+GET:3116
+POST:404
+Errors:-
+Timeouts:-
+Update:16:36:42
+    #+END_SRC
+
+** nginxをリバースプロキシ & HTTPサーバに
+   #+BEGIN_SRC sh
+sudo apt-get install nginx
+
+   #+END_SRC
+
 ** TODO
    - stockテーブルをなくして，代わりに { "variation_id": {他のカラムたち} } っていうハッシュテーブルをLLレベルで持たせる．
    - slow logチェック

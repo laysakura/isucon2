@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # sudo aptitude install -y python-flask python-mysqldb python-routes
 from __future__ import with_statement
 
@@ -50,6 +52,10 @@ def init_db():
 # 毎httpリクエスト毎にこんなJOINやっちゃってるのでひどいことになってる．
 # 実用上はそんなに正確にrecentを出す必要はないはず．ベンチマークでの正解チェックがどのくらいキツイのかをチェックして，
 # 緩める努力をすべき．
+#
+# 正解チェックでしっかりと見ている模様．
+# DB介さずに，tmpfs上のファイルでとかやりたいね．
+# 或いはquery cacheが効くかな?
 def get_recent_sold():
     cur = get_db().cursor()
     cur.execute('''SELECT stock.seat_id, variation.name AS v_name, ticket.name AS t_name, artist.name AS a_name FROM stock
@@ -60,6 +66,7 @@ def get_recent_sold():
         ORDER BY order_id DESC LIMIT 10''')
     recent_sold = cur.fetchall()
     cur.close()
+    # print recent_sold
     return recent_sold
 
 
