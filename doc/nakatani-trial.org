@@ -228,7 +228,8 @@ Update:16:36:42
 ** nginxをリバースプロキシ & HTTPサーバに
    #+BEGIN_SRC sh
 sudo apt-get install nginx
-
+sudo cp /etc/nginx/nginx.conf conf/
+sudo ln -sf ~/git/isucon2/conf/nginx.conf /etc/nginx/
    #+END_SRC
 
 ** TODO
