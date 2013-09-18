@@ -1,0 +1,15 @@
+* TIPS集
+** MySQL
+*** 全クエリを見る
+    slow query log を有効にした状態で
+    #+BEGIN_SRC sh
+set global slow_query_log = 1;
+set global slow_query_log_file = '/tmp/all-query.log';
+set global long_query_time = 0;
+    #+END_SRC
+
+*** 遅いクエリ(回数が多いせい，も含め)を集計する
+    - http://d.hatena.ne.jp/sh2/20090414
+    #+BEGIN_SRC sh
+mysqldumpslow -s t /tmp/all-query.log
+    #+END_SRC
