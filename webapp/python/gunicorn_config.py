@@ -1,5 +1,5 @@
 # bind = 'unix:/tmp/gunicorn.sock'
-bind = '0.0.0.0:5000'
+bind = '0.0.0.0:5002'
 
 backlog = 2048
 workers = 5

@@ -369,7 +369,12 @@ git diff
 +            proxy_cache_valid any 1m;
     #+END_SRC
 
+** appサーバの動的生成コンテンツをgzip圧縮
+*** スコア
+    *up - 倍増*
+
+*** 作業ログ
+   #+BEGIN_SRC sh
+   #+END_SRC
+
 ** TODOs
-   - stockテーブルをなくして，代わりに { "variation_id": {他のカラムたち} } っていうハッシュテーブルをLLレベルで持たせる．
-   - slow logチェック
-   - my.cnfチェック
