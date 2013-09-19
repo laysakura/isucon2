@@ -1,0 +1,11 @@
+* 本番で使いそうなテク
+  忘れずに復習しよう
+
+  - http_load: 各URIの fetch/sec 測定
+  - mysql の slow_query の秒数0で全クエリログ: http://d.hatena.ne.jp/sh2/20090414
+  - dstat -cdglmrn
+  - Flask での gzip 配信: https://github.com/laysakura/isucon2/commit/b5d5274c19a06899f2afb6c0ba3b3a7796881d34
+
+* やり残したこと
+  - Redis
+  - 事前gzip: http://blog.nomadscafe.jp/2012/11/isucon2-5.html
