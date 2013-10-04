@@ -1,4 +1,11 @@
 * 10/04練習 w/ ISUCON2
+** http_loadの使い方
+   #+
+   ~/isucon2/tools/http_load_isucon2/http_load -verbose -parallel 100 -seconds 5 ~/isucon2/ticket_url.txt
+
+   parallel 沢山にするのを忘れずに
+
+
 ** 初期状態
    スコア 300
 
@@ -42,8 +49,10 @@ $ git diff HEAD^
  max_connections = 1024
  max_connect_errors = 10000
 -sort_buffer_size = 1M
+-read_buffer_size = 1M
+-myisam_sort_buffer_size = 1M
 +sort_buffer_size = 2G
- read_buffer_size = 1M
++read_buffer_size = 2G
 -myisam_sort_buffer_size = 1M
 +#myisam_sort_buffer_size = 1M
  thread_cache = 256
@@ -89,8 +98,160 @@ $ git diff HEAD^
  
  slow_query_log
 -long_query_time = 3
-+long_query_time = 0.3
++long_query_time = 0.1
    #+END_SRC
+
+** nginx導入
+   スコア 730
+
+   - スコアは変わらず．
+   - supervisord との協調のために， "daemon off;" が必要なので注意．
+
+   #+BEGIN_SRC sh
+--- a/nginx/nginx.conf
++++ b/nginx/nginx.conf
+@@ -3,14 +3,14 @@
+ #   * Official Russian Documentation: http://nginx.org/ru/docs/
+ 
+ user  nginx;
+-worker_processes  1;
++worker_processes  2;
+ 
+ error_log  /var/log/nginx/error.log;
+ #error_log  /var/log/nginx/error.log  notice;
+ #error_log  /var/log/nginx/error.log  info;
+ 
+ pid        /var/run/nginx.pid;
+-
++daemon off;
+ 
+ events {
+     worker_connections  1024;
+@@ -40,92 +40,29 @@ http {
+     # for more information.
+     include /etc/nginx/conf.d/*.conf;
+ 
+-    server {
+-        listen       80;
+-        server_name  localhost;
++    ##
++    # Reverse Proxy Settings for App Server
++    ##
++    upstream isucon2-backend {
++        server 127.0.0.1:5000 fail_timeout=0;
++    }
+ 
+-        #charset koi8-r;
++    ##
++    # HTTP Server Settings
++    ##
++    server {
++        listen  80;
++        client_max_body_size 4G;
++        server_name ec2-54-238-162-6.ap-northeast-1.compute.amazonaws.com;
+ 
+-        #access_log  /var/log/nginx/host.access.log  main;
++        keepalive_timeout 180;
+ 
+         location / {
+-            root   /usr/share/nginx/html;
+-            index  index.html index.htm;
++            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
++            proxy_set_header Host $http_host;
++            proxy_set_header X-Real-IP $remote_addr;
++            proxy_pass http://isucon2-backend;
+         }
+-
+-        # redirect server error pages to the static page /40x.html
+-        #
+-        error_page  404              /404.html;
+-        location = /40x.html {
+-            root   /usr/share/nginx/html;
+-        }
+-
+-        # redirect server error pages to the static page /50x.html
+-        #
+-        error_page   500 502 503 504  /50x.html;
+-        location = /50x.html {
+-            root   /usr/share/nginx/html;
+-        }
+-
+-        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+-        #
+-        #location ~ \.php$ {
+-        #    proxy_pass   http://127.0.0.1;
+-        #}
+-
+-        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+-        #
+-        #location ~ \.php$ {
+-        #    root           html;
+-        #    fastcgi_pass   127.0.0.1:9000;
+-        #    fastcgi_index  index.php;
+-        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+-        #    include        fastcgi_params;
+-        #}
+-
+-        # deny access to .htaccess files, if Apache's document root
+-        # concurs with nginx's one
+-        #
+-        #location ~ /\.ht {
+-        #    deny  all;
+-        #}
+     }
+ 
+-
+-    # another virtual host using mix of IP-, name-, and port-based configuration
+-    #
+-    #server {
+-    #    listen       8000;
+-    #    listen       somename:8080;
+-    #    server_name  somename  alias  another.alias;
+-
+-    #    location / {
+-    #        root   html;
+-    #        index  index.html index.htm;
+-    #    }
+-    #}
+-
+-
+-    # HTTPS server
+-    #
+-    #server {
+-    #    listen       443;
+-    #    server_name  localhost;
+-
+-    #    ssl                  on;
+-    #    ssl_certificate      cert.pem;
+-    #    ssl_certificate_key  cert.key;
+-
+-    #    ssl_session_timeout  5m;
+-
+-    #    ssl_protocols  SSLv2 SSLv3 TLSv1;
+-    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+-    #    ssl_prefer_server_ciphers   on;
+-
+-    #    location / {
+-    #        root   html;
+-    #        index  index.html index.htm;
+-    #    }
+-    #}
+-
+ }
+diff --git a/supervisord.conf b/supervisord.conf
+index 89576c8..00dfecc 100644
+--- a/supervisord.conf
++++ b/supervisord.conf
+@@ -66,7 +66,7 @@ stdout_logfile=/var/lib/supervisor/log/mysqld.log
+ command=/usr/sbin/nginx -c /etc/nginx/nginx.conf
+ autostart=true
+ autorestart=true
+-user=root
++user=nginx
+ redirect_stderr=true
+ stdout_logfile=/var/lib/supervisor/log/nginx.log
+   #+END_SRC
+
 
 
 
