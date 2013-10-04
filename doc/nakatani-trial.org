@@ -1,3 +1,102 @@
+* 10/04練習 w/ ISUCON2
+** 初期状態
+   スコア 300
+
+** use flask.ext.compress
+   スコア 350
+
+   #+BEGIN_SRC sh
+export PATH=$HOME/local/python-2.7.4/bin:$PATH
+easy_install flask_compress
+   #+END_SRC
+
+   #+BEGIN_SRC sh
+$ git diff HEAD^
+--- a/webapp/python/app.py
++++ b/webapp/python/app.py
+@@ -12,12 +12,14 @@ from flask import (
+         Flask, request, redirect,
+         render_template, _app_ctx_stack, Response
+         )
++from flask.ext.compress import Compress
+ 
+ import json, os
+ 
+ config = {}
+ 
+ app = Flask(__name__, static_url_path='')
++Compress(app)
+   #+END_SRC
+
+** my.cnf 変更1
+   スコア 530
+
+   - クエリキャッシュ有効化
+   - 各種バッファ増
+
+   #+BEGIN_SRC sh
+--- a/my.cnf
++++ b/my.cnf
+@@ -17,12 +17,12 @@ max_allowed_packet = 8M
+ table_open_cache = 256
+ max_connections = 1024
+ max_connect_errors = 10000
+-sort_buffer_size = 1M
++sort_buffer_size = 2G
+ read_buffer_size = 1M
+-myisam_sort_buffer_size = 1M
++#myisam_sort_buffer_size = 1M
+ thread_cache = 256
+-query_cache_size = 0M
+-query_cache_type = 0
++query_cache_size = 2G
++query_cache_type = 1
+ thread_concurrency = 8
+ tmp_table_size = 64M
+ max_heap_table_size = 64M
+@@ -48,7 +48,7 @@ innodb_data_file_path = ibdata1:10M:autoextend
+ innodb_data_home_dir = /var/lib/mysql
+ innodb_file_format = Barracuda
+ innodb_file_per_table
+-innodb_buffer_pool_size = 128MB
++innodb_buffer_pool_size = 2G
+ innodb_additional_mem_pool_size = 20M
+ innodb_write_io_threads = 8
+ innodb_read_io_threads = 8
+   #+END_SRC
+
+** my.cnf 変更2
+   スコア 730
+
+   - mysqlのEXPLAINコマンドを見てみたら，"Using temporary; Using filesort" とか書いてあったので，tmp tableのバッファを増やしたくなった．
+
+   #+BEGIN_SRC sh
+--- a/my.cnf
++++ b/my.cnf
+@@ -24,8 +24,8 @@ thread_cache = 256
+ query_cache_size = 2G
+ query_cache_type = 1
+ thread_concurrency = 8
+-tmp_table_size = 64M
+-max_heap_table_size = 64M
++tmp_table_size = 2G
++max_heap_table_size = 2G
+ skip-name-resolve
+ character-set-server=utf8
+ default-storage-engine=InnoDB
+@@ -39,7 +39,7 @@ binlog_format=mixed
+ replicate-ignore-db=mysql
+ 
+ slow_query_log
+-long_query_time = 3
++long_query_time = 0.3
+   #+END_SRC
+
+
+
+
+
+
 * 練習 w/ ISUCON2
 ** 初期状態
 *** スコア
